@@ -20,7 +20,7 @@ console.log(`
 
        `)
 
-
+// Connects to database
 const db = mySql.createConnection(
   {
     host: "localhost",
@@ -32,7 +32,7 @@ const db = mySql.createConnection(
   },
   console.log("Connected to employee_db.")
 );
-
+// Prompts for different information
 const firstPrompt = [
   {
     type: "list",
@@ -192,7 +192,7 @@ const updateRole = [
 ]
   }
 ];
-
+// Prompt Functions
 function mainPrompt() {
   inquirer
     .prompt(firstPrompt)
@@ -340,4 +340,5 @@ function updateEmployeeRole() {
    })
    .catch(err => console.error(err))
 }
+// Runs Main Prompt on Start
 mainPrompt();
