@@ -14,7 +14,7 @@ To start the app simply input: npm start in your command-line.
 
 Then simply select an option in the list that is provided and answer the questions that you are prompted.
 
-Here is a link to a walkthrough video - 
+Here is a link to a walkthrough video - [Video Link](Assets/Walkthrough%20Video/2023-02-21%2019-15-03.mp4)
 
 ## License
 
