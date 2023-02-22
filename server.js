@@ -9,6 +9,18 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+
+console.log(` 
+   _____)                                 ______)                    
+  /                /)                    (,  /             /)           
+  )__   ___  __   //  __       _   _         /  __  _   _ (/_   _  __ 
+ /    /  // (_/_)_(/_(_) (_/__(/__(/_    ) /   / (_(_(_(__/(___(/_/ (_
+(_____)    .-/          .-/             (_/                           
+          (_/          (_/                                            
+
+       `)
+
+
 const db = mySql.createConnection(
   {
     host: "localhost",
