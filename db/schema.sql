@@ -12,21 +12,25 @@ CREATE TABLE departments(
 CREATE TABLE roles(
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30), 
-    department_id INT, 
     salary DECIMAL, 
-    FOREIGN KEY (department_id)
+    department_id INT, 
+    CONSTRAINT fk_department FOREIGN KEY (department_id)
     REFERENCES departments(id)
-    ON DELETE SET NULL
+    ON DELETE CASCADE
 );
 
 CREATE TABLE employees(
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30), 
     last_name VARCHAR(30), 
-    role_id INT, 
-    manager_id INT,
-    FOREIGN KEY (role_id)
+    role_id INT,
+    INDEX role_id (role_id), 
+    CONSTRAINT fk_role FOREIGN KEY (role_id)
     REFERENCES roles(id)
+    ON DELETE CASCADE,
+    manager_id INT,
+    CONSTRAINT fk_manager FOREIGN KEY (manager_id)
+    REFERENCES employees(id)
     ON DELETE SET NULL
 );
 

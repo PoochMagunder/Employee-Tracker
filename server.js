@@ -33,7 +33,7 @@ const firstPrompt = [
       "add a department",
       "add a role",
       "add an employee",
-      "update an employee",
+      "update an employee's role",
     ],
   },
 ];
@@ -63,7 +63,7 @@ const addRole = [
     type: "list",
     name: "roles_department",
     message: "Which department does this role belong to?",
-    choices: ["Sales", "Engineering", "Finance", "Legal"],
+    choices: [{value:1,name:"Sales"}, {value:2, name:"Engineering"}, {value:3, name:"Finance"}, {value:4, name:"Legal"}, {value:5, name:"Human Resources"}],
   },
 ];
 
@@ -82,32 +82,50 @@ const addEmployee = [
     type: "list",
     name: "employee_role",
     message: "What is the employee's role",
-    choices: [
-      "Sales Lead",
-      "Salesperson",
-      "Lead Engineer",
-      "Software Engineer",
-      "Account Manager",
-      "Accountant",
-      "Legal Team Lead",
-      "Lawyer",
-    ],
+    choices: [{value:1,
+      name:"Sales Lead"},
+  { value:2,
+    name:"Salesperson"},
+  { value:3,
+    name:"Lead Engineer"},
+  { value:4,
+    name:"Software Engineer"},
+  { value:5,
+    name:"Account Manager"},
+  { value:6,
+    name:"Accountant"},
+  { value:7,
+    name:"Legal Team Lead"},
+  { value:8,
+    name:"Lawyer"},
+  { value:9,
+    name:"Human Resource Agent"},
+],
   },
   {
     type: "list",
     name: "employees_manager",
     message: "Who is the employee's manager",
     choices: [
-      "None",
-      "John Doe",
-      "Mike Chan",
-      "Ashley Rodriguez",
-      "Kevin Tupik",
-      "Kunal Singh",
-      "Malia Brown",
-      "Sarah Lourd",
-      "Tom Allen",
-    ],
+      { value:1,
+        name:"John Doe"},
+      { value:2,
+        name:"Mike Chan"},
+      { value:3,
+        name:"Ashley Rodriguez"},
+      { value:4,
+        name:"Kevin Tupik"},
+      { value:5,
+        name:"Kunal Singh"},
+      { value:6,
+        name:"Malia Brown"},
+      { value:7,
+        name:"Sarah Lourd"},
+      { value:8,
+        name:"Tom Allen"},
+      { value:9,
+        name:"Devon Eadie"},
+    ]
   },
 ];
 
@@ -115,149 +133,199 @@ const updateRole = [
   {
     type: "list",
     message: "Which employee's role do you want to update?",
-    name: "option",
+    name: "selected_employee",
     choices: [
-      "John Doe",
-      "Mike Chan",
-      "Ashley Rodriguez",
-      "Kevin Tupik",
-      "Kunal Singh",
-      "Malia Brown",
-      "Sarah Lourd",
-      "Tom Allen",
-    ],
+      { value:1,
+        name:"John Doe"},
+      { value:2,
+        name:"Mike Chan"},
+      { value:3,
+        name:"Ashley Rodriguez"},
+      { value:4,
+        name:"Kevin Tupik"},
+      { value:5,
+        name:"Kunal Singh"},
+      { value:6,
+        name:"Malia Brown"},
+      { value:7,
+        name:"Sarah Lourd"},
+      { value:8,
+        name:"Tom Allen"},
+      { value:9,
+        name:"Devon Eadie"},
+    ]
   },
+  {
+    type: "list",
+    message: "Which role do you want to assign the selected employee?",
+    name: "new_role",
+    choices: [{value:1,
+      name:"Sales Lead"},
+  { value:2,
+    name:"Salesperson"},
+  { value:3,
+    name:"Lead Engineer"},
+  { value:4,
+    name:"Software Engineer"},
+  { value:5,
+    name:"Account Manager"},
+  { value:6,
+    name:"Accountant"},
+  { value:7,
+    name:"Legal Team Lead"},
+  { value:8,
+    name:"Lawyer"},
+  { value:9,
+    name:"Human Resource Agent"},
+]
+  }
 ];
 
-inquirer
+function mainPrompt() {
+  inquirer
+    .prompt(firstPrompt)
+    .then((answer) => {
 
-  .prompt(firstPrompt)
+      if (answer.option === "view all departments") {
+        viewAllDepartments()
+      }
+        
+      if (answer.option === "view all roles") {
+       viewAllRoles()
+      }
+  
+      if (answer.option === "view all employees") {
+        viewAllEmployees()
+      }
+  
+      if (answer.option === "add a department") {
+        addNewDepartment()
+      }
+  
+      if (answer.option === "add a role") {
+       addNewRole()
+      }
+  
+      if (answer.option === "add an employee") {
+        addNewEmployee()
+      }
+  
+      if (answer.option === "update an employee's role") {
+      updateEmployeeRole()
+      }
+})};     
 
-  .then((answer) => {
-    if (answer.option === "view all departments") {
-      const sql = `SELECT * from departments AS department`;
+function viewAllDepartments() {
+  const sql = `SELECT * from departments AS department`;
+  
+  db.promise().query(sql)
+    .then(([rows]) => {
+      console.table(rows)
+    })
+    .then(() => {
+      return mainPrompt()
+    })
+    .catch(err => console.error(err))
+}
 
-      db.query(sql, (err, response) => {
-        if (err) {
-          response.status(500).json({ error: err.message });
-          return;
-        } else {
-          console.table(response);
-          return inquirer.prompt(firstPrompt);
-        }
-      });
-    }
+function viewAllRoles() {
+  const sql = `SELECT roles.id, roles.title, departments.name AS department, roles.salary from departments 
+  LEFT JOIN roles ON departments.id = roles.department_id`;
+  
+  db.promise().query(sql)
+    .then(([rows]) => {
+      console.table(rows)
+    })
+    .then(() => {
+      return mainPrompt()
+    })
+    .catch(err => console.error(err))
+}
 
-    if (answer.option === "view all roles") {
-      const sql = `SELECT roles.id, roles.title, departments.name AS department, roles.salary from departments LEFT JOIN roles ON departments.id = roles.department_id`;
+function viewAllEmployees() {
+  const sql = `SELECT
+      e1.id,
+      e1.first_name,
+      e1.last_name,
+      roles.title AS title,
+      departments.name AS department,
+      roles.salary
+      FROM employees e1
+      LEFT JOIN roles ON e1.role_id = roles.id
+      LEFT JOIN departments ON roles.department_id = departments.id;`;
+  
+        db.promise().query(sql)
+          .then(([rows]) => {
+            console.table(rows)
+          })
+          .then(() => {
+            return mainPrompt()
+          })
+          .catch(err => console.error(err))
+}
 
-      db.query(sql, (err, response) => {
-        if (err) {
-          response.status(500).json({ error: err.message });
-          return;
-        } else {
-          console.table(response);
-          return inquirer.prompt(firstPrompt);
-        }
-      });
-    }
+function addNewDepartment() {
+  inquirer
+          .prompt(addDepartment)
+          .then((answer) => {
+  const sql = `INSERT INTO departments (name)
+  VALUES ('${answer.department}')`;
+        
+      db.promise().query(sql)
+        .then(() => {
+        console.log("Added Department to database")
+         viewAllDepartments()
+        })
+        .catch(err => console.error(err))
+          
+})
+}
 
-    if (answer.option === "view all employees") {
-      const sql = `SELECT
-    e1.id,
-    e1.first_name,
-    e1.last_name,
-    roles.title AS title,
-    departments.name AS department,
-    roles.salary
-    FROM employees e1
-    LEFT JOIN roles ON e1.role_id = roles.id
-    LEFT JOIN departments ON roles.department_id = departments.id;`;
+function addNewRole() {
+  inquirer
+          .prompt(addRole)
+  
+          .then(answers => {
 
-      db.query(sql, (err, response) => {
-        if (err) {
-          console.log({ error: err.message });
-          return;
-        } else {
-          console.table(response);
-          return inquirer.prompt(firstPrompt);
-        }
-      });
-    }
+            const sql = `INSERT INTO roles (title, salary, department_id)
+        VALUES ('${answers.role_name}','${answers.role_salary}','5')`;
+            
+        db.promise().query(sql)
+              console.log("Added new role to database");
+              viewAllRoles()
+            })
+            .catch(err => console.error(err))
+}
 
-    if (answer.option === "add a department") {
-      inquirer
-        .prompt(addDepartment)
+function addNewEmployee() {
+  inquirer
+  .prompt(addEmployee)
 
-        .then(answer, (res) => {
-          const sql = `INSERT INTO departments (name)
-    VALUES (?)`;
-          const params = answer.department;
+  .then(answers => {
+    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
+VALUES('${answers.first_name}',
+  '${answers.last_name}',
+  '5',
+  '2')`;
+    
+db.promise().query(sql)
+      console.log("Added new employee to database");
+      viewAllEmployees()
+    })
+    .catch(err => console.error(err))
+}
 
-          db.query(sql, params, (err, response) => {
-            console.table(response);
-            return inquirer.prompt(firstPrompt);
-          });
-        });
-    }
+function updateEmployeeRole() {
+  inquirer
+  .prompt(updateRole)
+   .then(answers => {
+  const sql = `UPDATE employees SET role_id = ${answers.new_role} WHERE employees.id = ${answers.selected_employee}`;
+  
 
-    if (answer.option === "add a role") {
-      inquirer
-        .prompt(addRole)
-
-        .then(answers, (res) => {
-          const sql = `INSERT INTO roles (title, salary, department)
-      VALUES (?)`;
-          const params =
-            (answers.role_name, answers.role_salary, answers.role_department);
-
-          db.query(sql, params, (err, response) => {
-            console.table(response);
-            return inquirer.prompt(firstPrompt);
-          });
-        });
-    }
-
-    if (answer.option === "add an employee") {
-      inquirer
-        .prompt(addEmployee)
-
-        .then(answers, (res) => {
-          const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)
-      VALUES(?)`;
-          const params =
-            (answers.first_name,
-            answers.last_name,
-            answers.employee_role,
-            answers.employees_manager);
-
-          db.query(sql, params, (err, response) => {
-            console.table(response);
-            return inquirer.prompt(firstPrompt);
-          });
-        });
-    }
-
-    if (answer.option === "update an employees role") {
-      inquirer.prompt(updateRole);
-
-      const sql = `UPDATE employees SET  = ? WHERE id = ?`;
-      const params = [req.body.review, req.params.id];
-
-      db.query(sql, params, (err, result) => {
-        if (err) {
-          res.status(400).json({ error: err.message });
-        } else if (!result.affectedRows) {
-          res.json({
-            message: "Movie not found",
-          });
-        } else {
-          res.json({
-            message: "success",
-            data: req.body,
-            changes: result.affectedRows,
-          });
-        }
-      });
-    }
-  });
+  db.query(sql)
+    console.log("Updated selected employee's role")
+    viewAllEmployees()
+   })
+   .catch(err => console.error(err))
+}
+mainPrompt();
